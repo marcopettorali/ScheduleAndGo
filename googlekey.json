@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "abiding-state-299321",
+  "private_key_id": "ff26bae90314e7a2a0b831f5e94c008928541441",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDEmyCMrPCsHHYd\nD+eOcHT0O6t1se4m/K4wB0N2UOXGerMhOVQlY4h/m+YJB5BA+VhVUb6YvykyL7QC\nvROHjX29km87jTNQ51hcKLEomJPJ9B0m21XmPudvxeZjuSGLYUGUzuKd0BLkASoE\noGxrXF015MZVNG4GPoL/TXGuoGVS6hKIMewPtQx5YCIhwt/nya3MkxheYG3yK8UG\nvdTyj3eQI9ChUWq8jXokM+P25w1kjYyzDi14yVINHi12EitwweI0DcbM0Si83ykJ\n5xtFzAqC1c3NGmIuRNTR/nVsku8J7VAjpE0wejrvZkAy1IMkf4xuUmNeqRG1k4VE\nDIBaxH7PAgMBAAECggEARbJ8soIoe8tHL/xQaVWCkIaKvRmLxLR1B7+7cbkyC8+5\nqwCIzQxg+mQJA5Bz2iTK5Mwq1jmGYC07EnF29+n39nlwB1uCIp8w2tLuIuccFU79\n+qVs6UfJgf1VNGsP8jpTJm7FNY7q83taKvO4G8NNo+prSQ9iJcKJa/pHX9Gqud5z\nBnqv+wIMoXlWlvqym4/09xYBeyNUcdQWIjjcnC2NxPb4iVfcLNTFglnN3OekqjK4\nBaz2v1Ny88V7S1HQwx1PlVyeOd+OVTOieX1dsp5WIIE5gVK9CAwCZQnzJhtiZUEG\nulpkE7v9b1XpNwetDBIWRdcdkeIlCDDPmeWT0AdaiQKBgQD7TMpVJiM5MDs8G5MD\nrlZ7PhuW95iDaxCP4MPvLSOr42r6UgEHA0lYVCnjLWiJ+HcQ8AZo5nYzXsrhPn3r\n7C/8VqtHz6tK8ypoE7UudoDb1JvCjgyFoPOzft9/aoDvBLI94dgM1rYJrRMB7HYL\nF0ykI17924xCGunCe7XkVUg4AwKBgQDISHcQ3GQL0UVWUwo8Tjmpl5zdL8QehhYx\nyMHQS4pL1vtlcNFeuXyy6wJ5kUVJUmBwc8Lc0h8WAbjTBf5FK9h82/BmnB5h34Br\nAKomMiSei5c62kBbWQsRVftmtTVPUNZQxgiE/xeDyVATJd1fKbEoOYaXoC7tQ1oQ\nac5U/58iRQKBgQCddHzmIzI4t+61d7WCve5z4/NXgSVvWlsTO0qpBsht/91coJsC\nMN342Ssxq5bvs92uoCXz/kqbX06RGR2+/8sFOayyHv19xaSRd5+zUA7nLmy111kj\nNTjdA6a36ByHJpMj0OkVCkcfAvGA6A8CXgPoaD0xpClalhBXijnqqkDIzwKBgDmC\nJT4gKlICWwh4e53pUEFUGWShjIy/L6xH2u72YdV4+2KbTGMIm7e8J0/E2MI+9xYT\nB0bkxqxI/ksJk4NFHbpsZNDxzv+Hb5ZJ8JFbIIytxFTPyl7waG8n4zIQoigOLBux\nYUze+l+K9IUrAC+NByNnsS/kfNT/2+KOnwJlC8qJAoGAcFeackQ5f0HSBt0WkCdk\nPc12kUaA/Uv5/s2SkAgshufRYkgG9lm1xIbnVZgGijv/IGrK4BUdDfdG5rQjp+qw\ntl3adBMpHFnJ/52Hjf1rG0I69Wm4UKrzPywuURDj1ONEoxpaG3sdpDbZrROf8zQk\nlY98FY4XwenAUM/iu+YLzUs=\n-----END PRIVATE KEY-----\n",
+  "client_email": "marcopettorali@abiding-state-299321.iam.gserviceaccount.com",
+  "client_id": "100101583799782080957",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/marcopettorali%40abiding-state-299321.iam.gserviceaccount.com"
+}
