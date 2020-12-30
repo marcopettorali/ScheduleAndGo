@@ -5,11 +5,13 @@ import os
 class NaturalProcessingLanguageGoogleCloud:
     def __init__(self):
         # write path of Google Cloud Credentials
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "googlekey.json"
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google_key.json"
         # set parameters for each request
         self.client = language_v1.LanguageServiceClient()
         self.type_ = language_v1.Document.Type.PLAIN_TEXT
         self.encoding_type = language_v1.EncodingType.UTF8
+
+        self.analyze_task("Vai a Cecina a prendere i carciofi entro le 14.30 di domani")
 
     def analyze_task(self, text_content):
         # build request JSON
@@ -69,11 +71,21 @@ class NaturalProcessingLanguageGoogleCloud:
     def extract_task(self, entities, words):
         action = {}
         destination = ""
-
+        deadline = ""
         for entity in entities:
             # add all the locations found in the destination (assuming a sentence only contains one destination)
             if entity['typ'] == 'LOCATION':
                 destination += entity['txt'] + " "
+
+        for word in words:
+            # add all the dates found in the destination (assuming a sentence only contains one date)
+            if word['pos'] == 'NUM':
+                # extract the verb of the examined word
+                adverb = self.get_target(word, words, target="ADP")
+                advs = self.get_sub_tree(word, words, ["ADV", "ADP"])
+                deadline += word['txt'] + " "
+                for a in advs:
+                    deadline += a['txt'] + " "
 
         for word in words:
             # check all the nouns
@@ -96,7 +108,7 @@ class NaturalProcessingLanguageGoogleCloud:
             return None
         else:
             # build the task as destination + action
-            task = {"destination": destination.strip(), "action": action}
+            task = {"destination": destination.strip(), "action": action, "deadline": deadline}
             return task
 
     def pop_entity(self, word, entities):
@@ -123,3 +135,22 @@ class NaturalProcessingLanguageGoogleCloud:
             # else analyze the parent of this node in the dependency tree
             else:
                 analyzed_word = words[analyzed_word['hti']]
+
+    def get_sub_tree(self, root, words, filter):
+        ret = []
+        for w in words:
+            stop = False
+            analyzed_word = w
+            while not stop:
+                # stop when find a verb
+                if analyzed_word == root and w['pos'] in filter:
+                    ret.append(w)
+                    break
+                # exit to prevent cycling on the same word (in case of get_target on a ROOT word)
+                elif analyzed_word == words[analyzed_word['hti']]:
+                    break
+                # else analyze the parent of this node in the dependency tree
+                else:
+                    analyzed_word = words[analyzed_word['hti']]
+
+        return ret
