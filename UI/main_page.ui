@@ -21,7 +21,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="6" column="0" colspan="2">
+    <item row="11" column="0" colspan="2">
      <widget class="QScrollArea" name="taskList">
       <property name="autoFillBackground">
        <bool>true</bool>
@@ -34,29 +34,15 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>407</width>
-         <height>320</height>
+         <width>409</width>
+         <height>327</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="taskListElems"/>
       </widget>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QProgressBar" name="progressBar">
-      <property name="value">
-       <number>0</number>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Next tasks:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
+    <item row="7" column="0">
      <widget class="QScrollArea" name="currentTask">
       <property name="minimumSize">
        <size>
@@ -84,7 +70,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>402</width>
+         <width>404</width>
          <height>148</height>
         </rect>
        </property>
@@ -92,12 +78,47 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="0">
+    <item row="9" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Next tasks:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
        <string>Current task:</string>
       </property>
      </widget>
+    </item>
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Current time:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="timeLabel">
+        <property name="font">
+         <font>
+          <family>SF Pro Display</family>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>time</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

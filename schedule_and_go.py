@@ -22,6 +22,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
     add_task_signal = QtCore.pyqtSignal(str, str, list, int)
     pop_task_signal = QtCore.pyqtSignal()
     clear_tasks_signal = QtCore.pyqtSignal()
+    update_time_signal = QtCore.pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
@@ -40,6 +41,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         self.add_task_signal.connect(self.add_task)
         self.pop_task_signal.connect(self.pop_task)
         self.clear_tasks_signal.connect(self.clear_tasks)
+        self.update_time_signal.connect(self.update_time)
 
         # initialize cloud components
         self.stt = stt.SpeechToTextManager("google_key.json")
@@ -49,7 +51,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         th.start()
 
         # initialize scheduler
-        self.time_daemon = TimeDaemon(min_every_sec=1)
+        self.time_daemon = TimeDaemon(min_every_sec=1, update_time_signal=self.update_time_signal)
         threading.Thread(target=self.time_daemon.run, args=()).start()
         # need to set current GPS position here
         self.scheduler = Scheduler(current_position="Pisa", time_daemon=self.time_daemon, polling_sec=5,
@@ -62,7 +64,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         frame = QtWidgets.QFrame()
         form = TaskForm(frame)
         form.destination_lbl.setText(destination)
-        form.deadline_lbl.setText("Entro le " + deadline)
+        form.deadline_lbl.setText("Arrivo previsto alle " + deadline)
 
         for a in actions:
             label = QtWidgets.QLabel(form)
@@ -131,6 +133,9 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
                                                   actions, -1)
             else:
                 self.tts.cached_say("Richiesta annullata")
+
+    def update_time(self, time):
+        self.timeLabel.setText(time)
 
 
 app = QApplication(sys.argv)
