@@ -14,6 +14,7 @@ class TimeDaemon:
             self._current_time = self._current_time + datetime.timedelta(
                 minutes=self._min_every_sec)
             time.sleep(1)
+            print(self._current_time)
 
     def get_current_time(self):
         return self._current_time

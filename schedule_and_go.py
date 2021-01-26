@@ -49,7 +49,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         th.start()
 
         # initialize scheduler
-        self.time_daemon = TimeDaemon(5)
+        self.time_daemon = TimeDaemon(min_every_sec=1)
         threading.Thread(target=self.time_daemon.run, args=()).start()
         # need to set current GPS position here
         self.scheduler = Scheduler(current_position="Pisa", time_daemon=self.time_daemon, polling_sec=5,
