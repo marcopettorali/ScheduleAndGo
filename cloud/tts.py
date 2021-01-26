@@ -9,8 +9,8 @@ class TextToSpeechManager:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google_key.json"
         """Synthesizes speech from the input string of text."""
         self.client = texttospeech.TextToSpeechClient()
-        if not os.path.exists("cached_speech"):
-            os.mkdir("cached_speech")
+        if not os.path.exists("../cached_speech"):
+            os.mkdir("../cached_speech")
 
     def say(self, text, file_name="out.mp3", remove=True):
         input_text = texttospeech.SynthesisInput(text=text)
@@ -38,9 +38,9 @@ class TextToSpeechManager:
             os.remove(file_name)
 
     def cached_say(self, text):
-        os.environ["PYTHONHASHSEED"] = "0"
-        hash_txt = str(hash(text))
-        os.environ["PYTHONHASHSEED"] = "random"
+        ord3 = lambda x: '%.3d' % ord(x)
+        hash_txt = str(hex(hash(int(''.join(map(ord3, text))))))[2:]
+
         file_path = "cached_speech/" + hash_txt + ".mp3"
         if os.path.exists(file_path):
             playsound(file_path)

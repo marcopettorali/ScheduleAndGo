@@ -1,5 +1,6 @@
 import speech_recognition as sr
 
+EMULATE = True
 
 class SpeechToTextManager:
     mic = None
@@ -13,7 +14,9 @@ class SpeechToTextManager:
         file = open(json_credentials_path, mode='r')
         self.google_cloud_credentials = file.read()
 
-    def listen(self):
+    def listen(self, default=None):
+        if default is not None:
+            return default
         # listen until pause is detected
         with sr.Microphone() as source:
             print('$ ', end='')

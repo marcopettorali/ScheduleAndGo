@@ -1,5 +1,6 @@
 from google.cloud import language_v1
 import os
+from datetime import date, timedelta, datetime
 
 
 class NaturalProcessingLanguageGoogleCloud:
@@ -11,8 +12,6 @@ class NaturalProcessingLanguageGoogleCloud:
         self.type_ = language_v1.Document.Type.PLAIN_TEXT
         self.encoding_type = language_v1.EncodingType.UTF8
 
-        self.analyze_task("Vai a Cecina a prendere i carciofi entro le 14.30 di domani")
-
     def analyze_task(self, text_content):
         # build request JSON
         document = {"content": text_content, "type_": self.type_}
@@ -21,7 +20,9 @@ class NaturalProcessingLanguageGoogleCloud:
         # get list of words
         words = self.extract_syntax(self.client, self.encoding_type, document)
         # return the task observed in this sentence
-        return self.extract_task(entities, words)
+        task = self.extract_task(entities, words)
+        # normalize the date time in the format %H:%M %d/%m/%y
+        return self.normalize_date_time(task)
 
     def extract_entities(self, client, encoding_type, document):
 
@@ -72,6 +73,8 @@ class NaturalProcessingLanguageGoogleCloud:
         action = {}
         destination = ""
         deadline = ""
+        deadline_h = ""
+        deadline_d = ""
         for entity in entities:
             # add all the locations found in the destination (assuming a sentence only contains one destination)
             if entity['typ'] == 'LOCATION':
@@ -84,8 +87,10 @@ class NaturalProcessingLanguageGoogleCloud:
                 adverb = self.get_target(word, words, target="ADP")
                 advs = self.get_sub_tree(word, words, ["ADV", "ADP"])
                 deadline += word['txt'] + " "
+                deadline_h += word['txt']
                 for a in advs:
                     deadline += a['txt'] + " "
+                    deadline_d += a['txt'] + " "
 
         for word in words:
             # check all the nouns
@@ -107,9 +112,34 @@ class NaturalProcessingLanguageGoogleCloud:
             print("WARNING: missing destination or action!")
             return None
         else:
-            # build the task as destination + action
-            task = {"destination": destination.strip(), "action": action, "deadline": deadline}
+            # build the task as destination + action + deadline
+            task = {"destination": destination.strip(),
+                    "action": action,
+                    "deadline": deadline,
+                    "deadline_h": deadline_h,
+                    "deadline_d": deadline_d}
             return task
+
+    def normalize_date_time(self, task):
+        norm_d = task['deadline_d']
+        day = date.today()
+        if "domani" in norm_d:
+            day += timedelta(days=1)
+        elif "dopodomani" in norm_d:
+            day += timedelta(days=2)
+
+        norm_d = day.strftime('%d/%m/%y')
+
+        norm_h = task['deadline_h'].strip()
+        if len(norm_h) == 1:
+            norm_h = "0" + norm_h
+        if ":" not in norm_h:
+            norm_h += ":00"
+
+        task['deadline_norm'] = norm_h + " " + norm_d
+        del task['deadline_h']
+        del task['deadline_d']
+        return task
 
     def pop_entity(self, word, entities):
         for entity in entities:

@@ -1,15 +1,15 @@
 import sys
 import threading
-import time
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QApplication
 
 import UI.main_page as ui
 import UI.form as f
-import nlp_google
-import stt
-import tts
+
+from cloud import stt, nlp_google, tts
+from scheduler.scheduler import Scheduler
+from scheduler.timeDaemon import TimeDaemon
 
 
 class TaskForm(QtWidgets.QWidget, f.Ui_Form):
@@ -21,6 +21,7 @@ class TaskForm(QtWidgets.QWidget, f.Ui_Form):
 class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
     add_task_signal = QtCore.pyqtSignal(str, str, list, int)
     pop_task_signal = QtCore.pyqtSignal()
+    clear_tasks_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
@@ -38,13 +39,21 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         # connect signals
         self.add_task_signal.connect(self.add_task)
         self.pop_task_signal.connect(self.pop_task)
+        self.clear_tasks_signal.connect(self.clear_tasks)
 
-        # initialize other components
-        self.s = stt.SpeechToTextManager("google_key.json")
-        self.n = nlp_google.NaturalProcessingLanguageGoogleCloud()
-        self.t = tts.TextToSpeechManager()
+        # initialize cloud components
+        self.stt = stt.SpeechToTextManager("google_key.json")
+        self.nlp = nlp_google.NaturalProcessingLanguageGoogleCloud()
+        self.tts = tts.TextToSpeechManager()
         th = threading.Thread(target=self.get_task_thread_body, daemon=True)
         th.start()
+
+        # initialize scheduler
+        self.time_daemon = TimeDaemon(5)
+        threading.Thread(target=self.time_daemon.run, args=()).start()
+        # need to set current GPS position here
+        self.scheduler = Scheduler(current_position="Pisa", time_daemon=self.time_daemon, polling_sec=5,
+                                   task_finished_signal=self.pop_task_signal)
 
     def on_help(self):
         print("Lorenzoni Pettorali - (C) 2020")
@@ -81,27 +90,47 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
             form = item.widget()
             self.currentTaskElem.addWidget(form)
 
+    def clear_tasks(self):
+        for i in reversed(range(self.currentTaskElem.count())):
+            self.currentTaskElem.itemAt(i).widget().setParent(None)
+
     def get_task_thread_body(self):
         while True:
-            sentence = self.s.listen()
-            task = self.n.analyze_task(sentence)
+            sentence = self.stt.listen()
+            task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
             for k in task['action']:
                 actions.append(k + " " + task['action'][k])
                 speech += k + " " + task['action'][k] + ", "
             speech += "Entro le " + task['deadline']
-            speech += ". Per confermare dire \"OK\""
-            self.t.cached_say(speech)
+            speech += ". Vuoi confermare?"
+            self.tts.cached_say(speech)
 
-            confirm = self.s.listen()
-            if confirm.strip().lower() == "ok":
-                # send request to task management system
-                self.add_task_signal.emit(task['destination'], task['deadline'], actions, -1)
-                self.t.cached_say("Ok, richiesta inviata")
-                # get response from task management system
+            confirm = self.stt.listen()
+            if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
+                                           "confermo", "confermato", "d'accordo"]:
+                self.tts.cached_say("Ok, richiesta inviata")
+                response = self.scheduler.schedule_new_task(destination=task['destination'],
+                                                            deadline=task['deadline_norm'],
+                                                            actions=task['action'])
+                if response['status'] == "ERR":
+                    self.tts.cached_say(
+                        "Non è possibile accettare la richiesta, la scadenza è troppo vicina. " +
+                        "Provare nuovamente con una scadenza più lontana.")
+                elif response['status'] == "OK":
+                    self.tts.cached_say("Richiesta accettata")
+                    tasks = self.scheduler.get_current_car_tasks()
+                    self.clear_tasks_signal.emit()
+                    for task in tasks:
+                        actions = []
+                        for k in task.get_actions():
+                            actions.append(k + " " + task.get_actions()[k])
+                        self.add_task_signal.emit(task.get_destination(),
+                                                  task.get_arrival_time().strftime("%H:%M, %d/%m/%Y"),
+                                                  actions, -1)
             else:
-                self.t.cached_say("Richiesta annullata")
+                self.tts.cached_say("Richiesta annullata")
 
 
 app = QApplication(sys.argv)
