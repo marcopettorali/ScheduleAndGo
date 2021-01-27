@@ -83,9 +83,8 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         else:
             self.taskListElems.insertWidget(index, form)
 
-        if self.currentTaskElem.isEmpty():
+        if self.currentTaskElem.count() == 0:
             self.pop_task()
-
     def pop_task(self):
         for i in reversed(range(self.currentTaskElem.count())):
             self.currentTaskElem.itemAt(i).widget().setParent(None)
@@ -112,12 +111,12 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
                 speech += k + " " + task['action'][k] + ", "
             speech += "Entro le " + task['deadline']
             speech += ". Vuoi confermare?"
-            self.tts.cached_say(speech)
+            #self.tts.cached_say(speech)
 
             confirm = self.stt.listen("ok")
             if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
                                            "confermo", "confermato", "d'accordo", "certo", "certamente"]:
-                self.tts.cached_say("Ok, richiesta inviata")
+                #self.tts.cached_say("Ok, richiesta inviata")
                 response = self.scheduler.schedule_new_task(destination=task['destination'],
                                                             deadline=task['deadline_norm'],
                                                             actions=task['action'])
@@ -129,7 +128,9 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
                     self.tts.cached_say("Richiesta accettata")
                     tasks = self.scheduler.get_current_car_tasks()
                     self.clear_tasks_signal.emit()
+                    print(len(tasks))
                     for task in tasks:
+                        print(task)
                         actions = []
                         for k in task.get_actions():
                             actions.append(k + " " + task.get_actions()[k])
