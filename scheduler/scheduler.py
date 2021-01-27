@@ -1,18 +1,20 @@
 import datetime
 import io
+import json
 import threading
 import time
 from threading import Lock
-import json
+
 import googlemaps
-from googlemaps.maps import StaticMapMarker
 from PIL import Image
+from googlemaps.maps import StaticMapMarker
+
 from scheduler.carTask import CarTask
 from scheduler.userTask import UserTask
 
 
 class Scheduler:
-    def __init__(self, current_position, time_daemon, polling_sec, task_finished_signal,
+    def __init__(self, current_position, time_daemon, polling_sec, task_finished_signal, update_position_signal,
                  criterion="distance"):
         with open("license.json") as license_file:
             data = json.load(license_file)
@@ -26,6 +28,7 @@ class Scheduler:
         self._polling_sec = polling_sec
         self._criterion = criterion
         self._task_finished_signal = task_finished_signal
+        self._update_position_signal = update_position_signal
 
         threading.Thread(target=self._emulate_current_position).start()
 
@@ -69,10 +72,12 @@ class Scheduler:
                         'lat', 'lng'))))
                     markers.append(StaticMapMarker(locations=car_task.get_destination()))
                     raw_image = b''
-                    for chunk in self._client.static_map(size=[900, 900], zoom=-2, markers=markers):
+                    #region to be determined by GPS position
+                    for chunk in self._client.static_map(size=[900, 900], zoom=-2, markers=markers, region="it"):
                         if chunk:
                             raw_image += chunk
                     im = Image.open(io.BytesIO(raw_image))
+                    self._update_position_signal.emit(im)
                     # QUI L'INVIO DELL'IMMAGINE ALL'INTERFACCIA GRAFICA
                     # im.show()
                     self._current_position = str(steps[pos]['lat']) + "," + str(steps[pos]['lng'])
@@ -98,13 +103,17 @@ class Scheduler:
             waypoints = []
             for w in candidate_user_tasks_schedule[:-1]:
                 waypoints.append(w.get_destination())
+        print("origin " + self._current_position)
+        print("destination " + candidate_user_tasks_schedule[-1].get_destination())
         directions_result = self._client.directions(origin=self._current_position,
                                                     destination=candidate_user_tasks_schedule[
                                                         -1].get_destination(),
-                                                    waypoints=waypoints)
+                                                    waypoints=waypoints,
+                                                    region="it") #region to be determined by GPS position
         pos = -1
         predicted_time = self._time_daemon.get_current_time()
         candidate_car_tasks_schedule = []
+        print(directions_result)
         for leg in directions_result[0]['legs']:
             pos = pos + 1
             start_time = predicted_time

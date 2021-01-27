@@ -23,6 +23,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
     pop_task_signal = QtCore.pyqtSignal()
     clear_tasks_signal = QtCore.pyqtSignal()
     update_time_signal = QtCore.pyqtSignal(str)
+    update_position_signal = QtCore.pyqtSignal()
 
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
@@ -42,6 +43,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         self.pop_task_signal.connect(self.pop_task)
         self.clear_tasks_signal.connect(self.clear_tasks)
         self.update_time_signal.connect(self.update_time)
+        self.update_position_signal.connect(self.update_position)
 
         # initialize cloud components
         self.stt = stt.SpeechToTextManager("google_key.json")
@@ -55,7 +57,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         threading.Thread(target=self.time_daemon.run, args=()).start()
         # need to set current GPS position here
         self.scheduler = Scheduler(current_position="Pisa", time_daemon=self.time_daemon, polling_sec=5,
-                                   task_finished_signal=self.pop_task_signal)
+                                   task_finished_signal=self.pop_task_signal, update_position_signal=self.update_position_signal)
 
     def on_help(self):
         print("Lorenzoni Pettorali - (C) 2020")
@@ -96,9 +98,12 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         for i in reversed(range(self.currentTaskElem.count())):
             self.currentTaskElem.itemAt(i).widget().setParent(None)
 
+    def update_position(self):
+
+
     def get_task_thread_body(self):
         while True:
-            sentence = self.stt.listen()
+            sentence = self.stt.listen("Vai a Roma a prendere i limoni entro le 23 di oggi")
             task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
@@ -109,9 +114,9 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
             speech += ". Vuoi confermare?"
             self.tts.cached_say(speech)
 
-            confirm = self.stt.listen()
+            confirm = self.stt.listen("ok")
             if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
-                                           "confermo", "confermato", "d'accordo"]:
+                                           "confermo", "confermato", "d'accordo", "certo", "certamente"]:
                 self.tts.cached_say("Ok, richiesta inviata")
                 response = self.scheduler.schedule_new_task(destination=task['destination'],
                                                             deadline=task['deadline_norm'],
