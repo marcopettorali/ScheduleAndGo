@@ -121,7 +121,7 @@
      </widget>
     </item>
     <item row="2" column="0">
-     <widget class="QLabel" name="label_4">
+     <widget class="QLabel" name="currentPositionImage">
       <property name="minimumSize">
        <size>
         <width>200</width>
@@ -132,7 +132,7 @@
        <string/>
       </property>
       <property name="scaledContents">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <property name="alignment">
        <set>Qt::AlignCenter</set>

@@ -73,12 +73,15 @@ class Scheduler:
                     markers.append(StaticMapMarker(locations=car_task.get_destination()))
                     raw_image = b''
                     #region to be determined by GPS position
-                    for chunk in self._client.static_map(size=[900, 900], zoom=-2, markers=markers, region="it"):
+                    for chunk in self._client.static_map(size=[200, 200], zoom=-2, markers=markers, region="it"):
                         if chunk:
                             raw_image += chunk
                     im = Image.open(io.BytesIO(raw_image))
-                    self._update_position_signal.emit(im)
-                    # QUI L'INVIO DELL'IMMAGINE ALL'INTERFACCIA GRAFICA
+                    with open("map.png", "wb") as img:
+                        img.write(raw_image)
+                    self._update_position_signal.emit()
+
+
                     # im.show()
                     self._current_position = str(steps[pos]['lat']) + "," + str(steps[pos]['lng'])
                     break
@@ -103,8 +106,6 @@ class Scheduler:
             waypoints = []
             for w in candidate_user_tasks_schedule[:-1]:
                 waypoints.append(w.get_destination())
-        print("origin " + self._current_position)
-        print("destination " + candidate_user_tasks_schedule[-1].get_destination())
         directions_result = self._client.directions(origin=self._current_position,
                                                     destination=candidate_user_tasks_schedule[
                                                         -1].get_destination(),
@@ -113,7 +114,6 @@ class Scheduler:
         pos = -1
         predicted_time = self._time_daemon.get_current_time()
         candidate_car_tasks_schedule = []
-        print(directions_result)
         for leg in directions_result[0]['legs']:
             pos = pos + 1
             start_time = predicted_time

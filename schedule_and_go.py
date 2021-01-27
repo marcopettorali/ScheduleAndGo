@@ -99,11 +99,11 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
             self.currentTaskElem.itemAt(i).widget().setParent(None)
 
     def update_position(self):
-
+        self.currentPositionImage.setPixmap(QtGui.QPixmap("map.png"))
 
     def get_task_thread_body(self):
         while True:
-            sentence = self.stt.listen("Vai a Roma a prendere i limoni entro le 23 di oggi")
+            sentence = self.stt.listen("Vai a Firenze a prendere i limoni entro le 23:59 di oggi")
             task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
