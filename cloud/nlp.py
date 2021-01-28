@@ -81,16 +81,20 @@ class NaturalProcessingLanguageGoogleCloud:
                 destination += entity['txt'] + " "
 
         for word in words:
+            if word['txt'].lower() in ["oggi", "domani", "dopodomani"]:
+                deadline_d += word['txt'] + " "
+                deadline += word['txt'] + " "
             # add all the dates found in the destination (assuming a sentence only contains one date)
-            if word['pos'] == 'NUM':
+            if word['pos'] == 'NUM' and self.read_entity(word, entities)['typ'] not in ["LOCATION", "ADDRESS"]:
                 # extract the verb of the examined word
                 adverb = self.get_target(word, words, target="ADP")
                 advs = self.get_sub_tree(word, words, ["ADV", "ADP"])
                 deadline += word['txt'] + " "
                 deadline_h += word['txt']
                 for a in advs:
-                    deadline += a['txt'] + " "
-                    deadline_d += a['txt'] + " "
+                    if a['txt'] not in deadline_d:
+                        deadline += a['txt'] + " "
+                        deadline_d += a['txt'] + " "
 
         for word in words:
             # check all the nouns
@@ -151,6 +155,12 @@ class NaturalProcessingLanguageGoogleCloud:
             elif entity['chk'] == True and entity['bof'] <= word['bof'] < entity['eof']:
                 # if already marked, do not add another entity
                 return None
+
+    def read_entity(self, word, entities):
+        for entity in entities:
+            # check if the word's bof is part of a non-marked entity
+            if entity['bof'] <= word['bof'] < entity['eof']:
+                return entity
 
     def get_target(self, word, words, target="VERB"):
         stop = False

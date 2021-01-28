@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 import UI.main_page as ui
 import UI.form as f
 
-from cloud import stt, nlp_google, tts
+from cloud import stt, nlp, tts
 from scheduler.scheduler import Scheduler
 from scheduler.timeDaemon import TimeDaemon
 
@@ -47,7 +47,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
 
         # initialize cloud components
         self.stt = stt.SpeechToTextManager("google_key.json")
-        self.nlp = nlp_google.NaturalProcessingLanguageGoogleCloud()
+        self.nlp = nlp.NaturalProcessingLanguageGoogleCloud()
         self.tts = tts.TextToSpeechManager()
         th = threading.Thread(target=self.get_task_thread_body, daemon=True)
         th.start()
@@ -56,8 +56,9 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         self.time_daemon = TimeDaemon(min_every_sec=1, update_time_signal=self.update_time_signal)
         threading.Thread(target=self.time_daemon.run, args=()).start()
         # need to set current GPS position here
-        self.scheduler = Scheduler(current_position="Pisa", time_daemon=self.time_daemon, polling_sec=5,
-                                   task_finished_signal=self.pop_task_signal, update_position_signal=self.update_position_signal)
+        self.scheduler = Scheduler(current_position="Cecina", time_daemon=self.time_daemon, polling_sec=5,
+                                   task_finished_signal=self.pop_task_signal,
+                                   update_position_signal=self.update_position_signal)
 
     def on_help(self):
         print("Lorenzoni Pettorali - (C) 2020")
@@ -85,6 +86,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
 
         if self.currentTaskElem.count() == 0:
             self.pop_task()
+
     def pop_task(self):
         for i in reversed(range(self.currentTaskElem.count())):
             self.currentTaskElem.itemAt(i).widget().setParent(None)
@@ -96,13 +98,24 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
     def clear_tasks(self):
         for i in reversed(range(self.currentTaskElem.count())):
             self.currentTaskElem.itemAt(i).widget().setParent(None)
+        for i in reversed(range(self.taskListElems.count())):
+            self.taskListElems.itemAt(i).widget().setParent(None)
 
     def update_position(self):
         self.currentPositionImage.setPixmap(QtGui.QPixmap("map.png"))
 
     def get_task_thread_body(self):
+        requests = [
+            "Vai a Roma a prendere una birra entro le 14 di dopodomani",
+            "Vai a Cosenza entro le 23 a ascoltare una band",
+            "Vai a Milano entro le 12 di domani a visitare il duomo"
+        ]
+        index = -1
         while True:
-            sentence = self.stt.listen("Vai a Firenze a prendere i limoni entro le 23:59 di oggi")
+            index += 1
+            if index >= len(requests):
+                break
+            sentence = self.stt.listen(requests[index])
             task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
@@ -111,12 +124,12 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
                 speech += k + " " + task['action'][k] + ", "
             speech += "Entro le " + task['deadline']
             speech += ". Vuoi confermare?"
-            #self.tts.cached_say(speech)
+            self.tts.cached_say(speech)
 
             confirm = self.stt.listen("ok")
             if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
                                            "confermo", "confermato", "d'accordo", "certo", "certamente"]:
-                #self.tts.cached_say("Ok, richiesta inviata")
+                self.tts.cached_say("Ok, richiesta inviata")
                 response = self.scheduler.schedule_new_task(destination=task['destination'],
                                                             deadline=task['deadline_norm'],
                                                             actions=task['action'])

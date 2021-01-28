@@ -110,9 +110,7 @@ class Scheduler:
                                                     destination=candidate_user_tasks_schedule[
                                                         -1].get_destination(),
                                                     waypoints=waypoints,
-                                                    language="it-IT",) #region to be determined by
-        # GPS
-        # position
+                                                    language="it-IT",) #region to be determined by GPS position
         pos = -1
         predicted_time = self._time_daemon.get_current_time()
         candidate_car_tasks_schedule = []
