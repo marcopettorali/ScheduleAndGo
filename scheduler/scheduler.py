@@ -67,23 +67,23 @@ class Scheduler:
                             break
                     # print("New Position: " + str(steps[pos]['lat']) + "," + str(steps[pos][
                     # 'lng']))
-                    markers = list()
-                    markers.append(StaticMapMarker(locations=dict((k, steps[pos][k]) for k in (
+                    if pos != 0:
+                        pos = pos - 1
+                        markers = list()
+                        markers.append(StaticMapMarker(locations=dict((k, steps[pos][k]) for k in (
                         'lat', 'lng'))))
-                    markers.append(StaticMapMarker(locations=car_task.get_destination()))
-                    raw_image = b''
-                    #region to be determined by GPS position
-                    for chunk in self._client.static_map(size=[200, 200], zoom=-2, markers=markers, region="it"):
-                        if chunk:
-                            raw_image += chunk
-                    im = Image.open(io.BytesIO(raw_image))
-                    with open("map.png", "wb") as img:
-                        img.write(raw_image)
-                    self._update_position_signal.emit()
-
-
-                    # im.show()
-                    self._current_position = str(steps[pos]['lat']) + "," + str(steps[pos]['lng'])
+                        markers.append(StaticMapMarker(locations=car_task.get_destination(),
+                                                   color="green"))
+                        raw_image = b''
+                        #region to be determined by GPS position
+                        for chunk in self._client.static_map(size=[200, 200], zoom=-2, markers=markers, region="it"):
+                            if chunk:
+                                raw_image += chunk
+                        im = Image.open(io.BytesIO(raw_image))
+                        with open("map.png", "wb") as img:
+                            img.write(raw_image)
+                        self._update_position_signal.emit()
+                        self._current_position = str(steps[pos]['lat']) + "," + str(steps[pos]['lng'])
                     break
             self._car_tasks_lock.release()
             time.sleep(self._polling_sec)
@@ -124,6 +124,7 @@ class Scheduler:
                 single_step = {'lat': step['end_location']['lat'],
                                'lng': step['end_location']['lng'],
                                'duration': step['duration']['value']}
+                print(str(step['duration']['text']) + "==" + str(step['duration']['value']))
                 emulate_position_steps.append(single_step)
             if predicted_time > candidate_user_tasks_schedule[pos].get_deadline():
                 return {"status": "ERR", "message": "Scheduling not feasible!"}
