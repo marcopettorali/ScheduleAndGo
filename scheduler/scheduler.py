@@ -110,7 +110,9 @@ class Scheduler:
                                                     destination=candidate_user_tasks_schedule[
                                                         -1].get_destination(),
                                                     waypoints=waypoints,
-                                                    region="it") #region to be determined by GPS position
+                                                    language="it-IT",) #region to be determined by
+        # GPS
+        # position
         pos = -1
         predicted_time = self._time_daemon.get_current_time()
         candidate_car_tasks_schedule = []
@@ -124,7 +126,6 @@ class Scheduler:
                 single_step = {'lat': step['end_location']['lat'],
                                'lng': step['end_location']['lng'],
                                'duration': step['duration']['value']}
-                print(str(step['duration']['text']) + "==" + str(step['duration']['value']))
                 emulate_position_steps.append(single_step)
             if predicted_time > candidate_user_tasks_schedule[pos].get_deadline():
                 return {"status": "ERR", "message": "Scheduling not feasible!"}
