@@ -93,8 +93,9 @@ class NaturalProcessingLanguageGoogleCloud:
                 deadline_h += word['txt']
                 for a in advs:
                     if a['txt'] not in deadline_d:
-                        deadline += a['txt'] + " "
                         deadline_d += a['txt'] + " "
+                    if a['txt'] not in deadline:
+                        deadline += a['txt'] + " "
 
         for word in words:
             # check all the nouns

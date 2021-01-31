@@ -105,17 +105,8 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
         self.currentPositionImage.setPixmap(QtGui.QPixmap("map.png"))
 
     def get_task_thread_body(self):
-        requests = [
-            "Vai a Roma a prendere una birra entro le 14 di dopodomani",
-            "Vai a Cosenza entro le 23 a ascoltare una band",
-            "Vai a Milano entro le 12 di domani a visitare il duomo"
-        ]
-        index = -1
         while True:
-            index += 1
-            if index >= len(requests):
-                break
-            sentence = self.stt.listen(requests[index])
+            sentence = self.stt.listen()
             task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
@@ -126,7 +117,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
             speech += ". Vuoi confermare?"
             self.tts.cached_say(speech)
 
-            confirm = self.stt.listen("ok")
+            confirm = self.stt.listen()
             if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
                                            "confermo", "confermato", "d'accordo", "certo", "certamente"]:
                 self.tts.cached_say("Ok, richiesta inviata")
