@@ -81,9 +81,6 @@ class NaturalProcessingLanguageGoogleCloud:
                 destination += entity['txt'] + " "
 
         for word in words:
-            if word['txt'].lower() in ["oggi", "domani", "dopodomani"]:
-                deadline_d += word['txt'] + " "
-                deadline += word['txt'] + " "
             # add all the dates found in the destination (assuming a sentence only contains one date)
             if word['pos'] == 'NUM' and self.read_entity(word, entities)['typ'] not in ["LOCATION", "ADDRESS"]:
                 # extract the verb of the examined word
@@ -92,10 +89,18 @@ class NaturalProcessingLanguageGoogleCloud:
                 deadline += word['txt'] + " "
                 deadline_h += word['txt']
                 for a in advs:
-                    if a['txt'] not in deadline_d:
-                        deadline_d += a['txt'] + " "
-                    if a['txt'] not in deadline:
-                        deadline += a['txt'] + " "
+                    deadline_d += a['txt'] + " "
+                    deadline += a['txt'] + " "
+
+            if word['txt'].lower() in ["oggi", "domani", "dopodomani"]:
+                if word['txt'] not in deadline_d:
+                    deadline_d += word['txt'] + " "
+                if word['txt'] not in deadline:
+                    deadline += word['txt'] + " "
+
+        print(deadline)
+        print(deadline_h)
+        print(deadline_d)
 
         for word in words:
             # check all the nouns

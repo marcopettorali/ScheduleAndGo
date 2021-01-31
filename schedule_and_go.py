@@ -106,7 +106,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
 
     def get_task_thread_body(self):
         while True:
-            sentence = self.stt.listen()
+            sentence = self.stt.listen("Vai a Roma a prendere le pizze entro le 23 di domani")
             task = self.nlp.analyze_task(sentence)
             speech = "Ok, vado a " + task['destination'] + " per il seguente motivo: "
             actions = []
@@ -117,7 +117,7 @@ class MainApp(QtWidgets.QMainWindow, ui.Ui_mainWindow):
             speech += ". Vuoi confermare?"
             self.tts.cached_say(speech)
 
-            confirm = self.stt.listen()
+            confirm = self.stt.listen("ok")
             if confirm.strip().lower() in ["ok", "sì", "si", "va bene", "perfetto", "esatto", "giusto", "affermativo",
                                            "confermo", "confermato", "d'accordo", "certo", "certamente"]:
                 self.tts.cached_say("Ok, richiesta inviata")
